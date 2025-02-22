@@ -14,6 +14,8 @@ from pathlib import Path
 
 
 #aehdaj
+#asaaa
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
