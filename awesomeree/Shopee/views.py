@@ -44,7 +44,7 @@ class ShopeeHealthDataAPI(APIView):
     @smart_retry_decorator()
     def worksheet(self):
         if self._worksheet is None:
-            SERVICE_ACCOUNT_FILE = r'C:\Users\Syed\awesomeree\Shopee\cred.json'
+            SERVICE_ACCOUNT_FILE = r'C:\Users\Mohd Low\awesomeree-webUI\awesomeree\Shopee\cred.json'
             SHEET_URL = 'https://docs.google.com/spreadsheets/d/11rOrVdtwWCYSTOfRgZT3XlDoOVLJ7GV8507jGTAx2dk/edit?usp=sharing'
             
             creds = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
@@ -166,3 +166,99 @@ class ShopeeHealthDataAPI(APIView):
                 {'error': f'Failed to fetch data: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class ShopeeHLateShipmentDataAPI(APIView):
+    renderer_classes = [JSONRenderer]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._worksheet = None
+        
+    @property
+    @smart_retry_decorator()
+    def worksheet(self):
+        if self._worksheet is None:
+            SERVICE_ACCOUNT_FILE = r'C:\Users\Mohd Low\Music\Service Files\firsttest-432604-6038cb0c81d1.json'
+            SHEET_URL = 'https://docs.google.com/spreadsheets/d/1cE3lOuM44zZvJBPVJJ6iNyNDKWJmsSXC3CQDj1Qcu34/'
+            creds = gspread.service_account(filename=SERVICE_ACCOUNT_FILE)
+            spreadsheet = creds.open_by_url(SHEET_URL)
+            # Replace "Sheet1" with the actual sheet name where your data resides.
+            self._worksheet = spreadsheet.worksheet("Sheet1")
+        return self._worksheet
+
+    def get_sheet_data(self):
+        """Fetch all rows from the sheet"""
+        return self.worksheet.get_all_values()
+
+    def process_row(self, row):
+        """
+        Process a single row from the Google Sheet.
+        Assumes the following indices (0-indexed):
+          0: Order id
+          1: Date
+          2: Shop Name
+          3: SKUs
+          5: Courier
+          7: Status
+          8: Warning Message
+          9: Remark
+        Columns E (index 4) and G (index 6) are empty and skipped.
+        """
+        # Skip header rows (for example if the first cell is "Order id")
+        if not row or row[0].lower() == "order id":
+            return None
+
+        try:
+            order_id = row[0].strip()
+            date_str = row[1].strip()
+            shop_name = row[2].strip()
+            skus = row[3].strip()
+            courier = row[5].strip() if len(row) > 5 else ""
+            status_val = row[7].strip() if len(row) > 7 else ""
+            warning_message = row[8].strip() if len(row) > 8 else ""
+            remark = row[9].strip() if len(row) > 9 else ""
+
+            # Optionally, convert the date into ISO format if possible.
+            try:
+                date_obj = datetime.strptime(date_str, "%d/%m/%Y")
+                date_iso = date_obj.date().isoformat()
+            except Exception as e:
+                logger.error(f"Date conversion error for value {date_str}: {e}")
+                date_iso = date_str  # Fallback to original string
+
+            return {
+                "order_id": order_id,
+                "date": date_iso,
+                "shop_name": shop_name,
+                "skus": skus,
+                "courier": courier,
+                "status": status_val,
+                "warning_message": warning_message,
+                "remark": remark
+            }
+        except Exception as e:
+            logger.error(f"Error processing row: {e}")
+            return None
+
+    def get(self, request, format=None):
+        try:
+            sheet_data = self.get_sheet_data()
+            if not sheet_data:
+                return Response({"error": "No data found in sheet"}, status=status.HTTP_404_NOT_FOUND)
+            
+            json_data = []
+            for row in sheet_data:
+                processed = self.process_row(row)
+                if processed:
+                    json_data.append(processed)
+            
+            if not json_data:
+                return Response({"error": "No valid data processed"}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Optionally, sort your data if needed. For example, by date:
+            json_data.sort(key=lambda x: x.get('date', ''))
+            
+            return Response(json_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Failed to fetch data: {e}")
+            return Response({"error": f"Failed to fetch data: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
