@@ -167,7 +167,7 @@ class ShopeeHealthDataAPI(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class ShopeeHLateShipmentDataAPI(APIView):
+class ShopeeLateShipmentDataAPI(APIView):
     renderer_classes = [JSONRenderer]
     
     def __init__(self, **kwargs):
@@ -218,17 +218,17 @@ class ShopeeHLateShipmentDataAPI(APIView):
             warning_message = row[8].strip() if len(row) > 8 else ""
             remark = row[9].strip() if len(row) > 9 else ""
 
-            # Optionally, convert the date into ISO format if possible.
+            '''# Optionally, convert the date into ISO format if possible.
             try:
                 date_obj = datetime.strptime(date_str, "%d/%m/%Y")
                 date_iso = date_obj.date().isoformat()
             except Exception as e:
                 logger.error(f"Date conversion error for value {date_str}: {e}")
-                date_iso = date_str  # Fallback to original string
+                date_iso = date_str  # Fallback to original string'''
 
             return {
                 "order_id": order_id,
-                "date": date_iso,
+                "date": date_str,
                 "shop_name": shop_name,
                 "skus": skus,
                 "courier": courier,
