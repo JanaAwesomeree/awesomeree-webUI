@@ -1,0 +1,261 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 256px;
+    background-color: white;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+}
+
+.sidebar-header {
+    height: 64px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.sidebar-nav {
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: #4b5563;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.nav-item.active {
+    background-color: #f3f4f6;
+    color: #111827;
+    font-weight: 600;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex: 1;
+    padding: 32px 40px;
+    margin-left: 256px;
+    overflow-y: auto;
+}
+
+.page {
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+.hidden {
+    display: none;
+}
+
+.page h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 24px;
+}
+
+.content-card {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+}
+
+/* Late Shipment Page Styles */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.shop-selector {
+    position: relative;
+}
+
+.shop-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shop-button:hover {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.shop-button:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+}
+
+.shop-button .icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    color: #6b7280;
+}
+
+.shop-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    width: 224px;
+    z-index: 50;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.shop-option {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.shop-option:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.shop-option:not(:last-child) {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Table Styles */
+.table-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    background-color: #f9fafb;
+    padding: 14px 24px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+td {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.view-details {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background-color: #eef2ff;
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.15s ease;
+}
+
+.view-details:hover {
+    background-color: #e0e7ff;
+    color: #4338ca;
+}
+.shop-button {
+    white-space: normal;
+    text-align: left;
+    max-width: 100%;
+    padding: 8px;
+}
