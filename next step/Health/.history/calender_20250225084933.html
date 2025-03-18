@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Calendar</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f3f4f6;
+            padding: 1rem;
+        }
+
+        .calendar-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 28rem;
+        }
+
+        .week-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .week-navigation h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-day {
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
+        }
+
+        .calendar-day:not(.disabled):hover {
+            background-color: #e5edff;
+            border-color: #93c5fd;
+        }
+
+        .calendar-day.selected {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .calendar-day.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f3f4f6;
+        }
+
+        .day-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-number {
+            font-size: 0.875rem;
+        }
+
+        .today-indicator {
+            font-size: 0.75rem;
+            color: #2563eb;
+            margin-top: 0.25rem;
+        }
+
+        .selected-date {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #eff6ff;
+            border-radius: 0.5rem;
+            color: #1e40af;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div id="calendar" class="calendar-container"></div>
+
+    <script>
+        class WeeklyCalendar {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.selectedDate = null;
+                this.currentWeekStart = this.getWeekStart(new Date());
+                
+                // Update calendar daily at midnight
+                this.scheduleNextUpdate();
+                this.init();
+            }
+
+            scheduleNextUpdate() {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                
+                const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+                
+                setTimeout(() => {
+                    this.currentWeekStart = this.getWeekStart(new Date());
+                    this.render();
+                    this.scheduleNextUpdate();
+                }, timeUntilMidnight);
+            }
+
+            getWeekStart(date) {
+                const d = new Date(date);
+                const day = d.getDay();
+                const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
+                return new Date(d.setDate(diff));
+            }
+
+            formatDate(date) {
+                return new Intl.DateTimeFormat('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                }).format(date);
+            }
+
+            isDateSelectable(date) {
+                // Get the start and end of the current week
+                const weekStart = new Date(this.currentWeekStart);
+                const weekEnd = new Date(this.currentWeekStart);
+                weekEnd.setDate(weekEnd.getDate() + 6);
+                weekEnd.setHours(23, 59, 59, 999);
+                
+                // Allow selection of any day within the current week
+                return date >= weekStart && date <= weekEnd;
+            }
+
+            createWeekNavigation() {
+                const nav = document.createElement('div');
+                nav.className = 'week-navigation';
+                
+                const weekLabel = document.createElement('h2');
+                weekLabel.textContent = 'Week of ' + this.formatDate(this.currentWeekStart);
+                
+                nav.appendChild(weekLabel);
+                return nav;
+            }
+
+            createCalendarGrid() {
+                const grid = document.createElement('div');
+                grid.className = 'calendar-grid';
+
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(this.currentWeekStart);
+                    date.setDate(date.getDate() + i);
+                    
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'calendar-day' + 
+                        (!this.isDateSelectable(date) ? ' disabled' : '');
+                    
+                    const dayName = document.createElement('div');
+                    dayName.className = 'day-name';
+                    dayName.textContent = date.toLocaleDateString('en-US', { weekday: 'short' });
+                    
+                    const dayNumber = document.createElement('div');
+                    dayNumber.className = 'day-number';
+                    dayNumber.textContent = date.getDate();
+                    
+                    dayElement.appendChild(dayName);
+                    dayElement.appendChild(dayNumber);
+                    
+                    // Add today indicator
+                    if (this.isToday(date)) {
+                        const todayIndicator = document.createElement('div');
+                        todayIndicator.className = 'today-indicator';
+                        todayIndicator.textContent = 'Today';
+                        dayElement.appendChild(todayIndicator);
+                    }
+                    
+                    if (this.isDateSelectable(date)) {
+                        dayElement.addEventListener('click', () => this.selectDate(date));
+                    }
+                    
+                    grid.appendChild(dayElement);
+                }
+
+                return grid;
+            }
+
+            isToday(date) {
+                const today = new Date();
+                return date.getDate() === today.getDate() &&
+                       date.getMonth() === today.getMonth() &&
+                       date.getFullYear() === today.getFullYear();
+            }
+
+            selectDate(date) {
+                if (!this.isDateSelectable(date)) {
+                    return;
+                }
+
+                this.selectedDate = date;
+                this.render();
+                
+                const formattedDate = date.toISOString().split('T')[0];
+                this.displayDateData(formattedDate);
+            }
+
+            displayDateData(dateStr) {
+                const date = new Date(dateStr);
+                const dayName = date.toLocaleString('en-US', { weekday: 'long' });
+                console.log(`Selected date: ${dateStr} (${dayName})`);
+            }
+
+            render() {
+                this.container.innerHTML = '';
+                
+                const calendar = document.createElement('div');
+                calendar.appendChild(this.createWeekNavigation());
+                calendar.appendChild(this.createCalendarGrid());
+                
+                if (this.selectedDate) {
+                    const selectedDateElement = document.createElement('div');
+                    selectedDateElement.className = 'selected-date';
+                    selectedDateElement.textContent = 'Selected date: ' + this.formatDate(this.selectedDate);
+                    calendar.appendChild(selectedDateElement);
+                }
+                
+                this.container.appendChild(calendar);
+                
+                // Update selected date visual
+                if (this.selectedDate) {
+                    const days = this.container.querySelectorAll('.calendar-day');
+                    days.forEach(day => {
+                        if (day.textContent.includes(this.selectedDate.getDate().toString())) {
+                            day.classList.add('selected');
+                        }
+                    });
+                }
+            }
+
+            init() {
+                // Set initial date to today
+                const today = new Date();
+                if (this.isDateSelectable(today)) {
+                    this.selectDate(today);
+                }
+                this.render();
+            }
+        }
+
+        // Initialize calendar when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new WeeklyCalendar('calendar');
+        });
+    </script>
+</body>
+</html>
