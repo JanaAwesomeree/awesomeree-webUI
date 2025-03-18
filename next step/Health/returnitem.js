@@ -111,21 +111,6 @@ document.addEventListener('DOMContentLoaded', async function() {
       returnHistory.forEach(request => {
         addToReturnHistory(request, false);
       });
-      
-      // Add event listeners to all edit and delete buttons
-      document.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const returnId = this.closest('tr').dataset.returnId;
-          editReturn(returnId);
-        });
-      });
-      
-      document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function() {
-          const returnId = this.closest('tr').dataset.returnId;
-          confirmDelete(returnId);
-        });
-      });
     } catch (error) {
       console.error('Failed to load return history:', error);
       historyTable.innerHTML = `
@@ -135,6 +120,25 @@ document.addEventListener('DOMContentLoaded', async function() {
           </td>
         </tr>
       `;
+    }
+  }
+  
+  // Helper function to attach event listeners to row buttons
+  function attachRowEventListeners(row) {
+    const editBtn = row.querySelector('.edit-btn');
+    if (editBtn) {
+      editBtn.addEventListener('click', function() {
+        const returnId = this.closest('tr').dataset.returnId;
+        editReturn(returnId);
+      });
+    }
+    
+    const deleteBtn = row.querySelector('.delete-btn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', function() {
+        const returnId = this.closest('tr').dataset.returnId;
+        confirmDelete(returnId);
+      });
     }
   }
   
@@ -204,16 +208,8 @@ document.addEventListener('DOMContentLoaded', async function() {
       </td>
     `;
     
-    // Add event listeners to the buttons directly
-    const editBtn = row.querySelector('.edit-btn');
-    editBtn.addEventListener('click', function() {
-      editReturn(itemId);
-    });
-    
-    const deleteBtn = row.querySelector('.delete-btn');
-    deleteBtn.addEventListener('click', function() {
-      confirmDelete(itemId);
-    });
+    // Add event listeners directly to buttons
+    attachRowEventListeners(row);
     
     historyTable.prepend(row);
     
@@ -292,6 +288,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Restore original HTML
     row.innerHTML = row.dataset.originalHtml;
     delete row.dataset.originalHtml;
+    
+    // Re-attach event listeners to the restored buttons
+    attachRowEventListeners(row);
   };
   
   // Save edited return item
@@ -375,6 +374,12 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   // Confirm delete operation
   window.confirmDelete = function(returnId) {
+    // Remove any existing modal first
+    let existingModal = document.getElementById('deleteConfirmModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+    
     // Create and show modal for confirmation
     const modal = document.createElement('div');
     modal.className = 'modal fade';
@@ -395,13 +400,19 @@ document.addEventListener('DOMContentLoaded', async function() {
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-danger" onclick="deleteReturn('${returnId}')">Delete</button>
+            <button type="button" class="btn btn-danger delete-confirm-btn">Delete</button>
           </div>
         </div>
       </div>
     `;
     
     document.body.appendChild(modal);
+    
+    // Add event listener to Delete button
+    const deleteConfirmBtn = modal.querySelector('.delete-confirm-btn');
+    deleteConfirmBtn.addEventListener('click', function() {
+      deleteReturn(returnId);
+    });
     
     // Show the modal
     const modalInstance = new bootstrap.Modal(modal);
@@ -416,10 +427,33 @@ document.addEventListener('DOMContentLoaded', async function() {
   // Delete return item
   window.deleteReturn = async function(returnId) {
     try {
-      // Hide the modal
-      const modal = document.getElementById('deleteConfirmModal');
-      const modalInstance = bootstrap.Modal.getInstance(modal);
-      modalInstance.hide();
+      // Hide the modal properly
+      const modalElement = document.getElementById('deleteConfirmModal');
+      if (modalElement) {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+          modalInstance.hide();
+        } else {
+          // If modal instance can't be found, remove it directly
+          modalElement.classList.remove('show');
+          modalElement.style.display = 'none';
+          modalElement.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('modal-open');
+          
+          // Remove the modal backdrop
+          const backdrop = document.querySelector('.modal-backdrop');
+          if (backdrop) {
+            backdrop.remove();
+          }
+          
+          // Wait a bit before removing the modal element
+          setTimeout(() => {
+            if (modalElement.parentNode) {
+              modalElement.parentNode.removeChild(modalElement);
+            }
+          }, 300);
+        }
+      }
       
       // Show loading indicator
       const row = document.querySelector(`tr[data-return-id="${returnId}"]`);

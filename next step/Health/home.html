@@ -712,6 +712,13 @@
               <option value="" selected disabled>Select return type</option>
               <option value="resell">Resell</option>
               <option value="damage">Damage</option>
+              <option value="missing">Missing Part</option>
+              <option value="Both">Repair and Resell</option>
+              <option value="not">Not Our Item</option>
+              <option value="charger-missing">Charger Missing</option>
+              <option value="charger-damage">Damaged Charger</option>
+              <option value="damage">1 Unit Damage 1 Unit Resell</option>
+              <option value="cannot">1 Unit Cannot Work 1 Unit Resell</option>
             </select>
           </div>
 
@@ -787,133 +794,237 @@
 <!-- End Return Item History Page -->
 
 <div class="repairs-page">
-  <!-- Repairs Submission Page -->
-  <div id="repairs-submit" class="page">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>Submit Repair Request</h2>
-    </div>
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title mb-3">Repair Details</h5>
-        <!-- Ensure method, action, and enctype are set correctly -->
-        <form
-          id="repairItemForm"
-          method="POST"
-          action="/repairs"
-          enctype="multipart/form-data"
-        >
-          <!-- Receive Date Field -->
-          <div class="mb-3">
-            <label for="receiveDate" class="form-label">Receive Date</label>
-            <input
-              type="date"
-              class="form-control"
-              id="receiveDate"
-              name="receive_date" 
-              required
-            />
-          </div>
-          
-          <div class="mb-3">
-            <label for="repairDate" class="form-label">Repair Date</label>
-            <input
-              type="date"
-              class="form-control"
-              id="repairDate"
-              name="repair_date" 
-              required
-            />
-          </div>
+ <!-- Repairs Submission Page -->
+<div id="repairs-submit" class="page">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Submit Repair Request</h2>
+  </div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Repair Details</h5>
+      <!-- Fixed form with proper AJAX submission -->
+      <form
+        id="repairItemForm"
+        method="POST"
+        action="/repairs"
+        enctype="multipart/form-data"
+        onsubmit="submitRepairForm(event)"
+      >
+        <!-- Receive Date Field -->
+        <div class="mb-3">
+          <label for="receiveDate" class="form-label">Receive Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="receiveDate"
+            name="receive_date" 
+            required
+          />
+        </div>
+        
+        <div class="mb-3">
+          <label for="repairDate" class="form-label">Repair Date</label>
+          <input
+            type="date"
+            class="form-control"
+            id="repairDate"
+            name="repair_date" 
+            required
+          />
+        </div>
 
-          <!-- Repair Purpose Dropdown -->
-          <div class="mb-3">
-            <label for="repairPurpose" class="form-label">Repair Purpose</label>
-            <select
-              class="form-select"
-              id="repairPurpose"
-              name="purpose"
-              required
-            >
-              <option value="" selected disabled>Select repair purpose</option>
-              <option value="resell">Resell</option>
-              <option value="customer">Customer</option>
-            </select>
-          </div>
+        <!-- Repair Purpose Dropdown -->
+        <div class="mb-3">
+          <label for="repairPurpose" class="form-label">Repair Purpose</label>
+          <select
+            class="form-select"
+            id="repairPurpose"
+            name="purpose"
+            required
+          >
+            <option value="" selected disabled>Select repair purpose</option>
+            <option value="resell">Resell</option>
+            <option value="customer">Customer</option>
+          </select>
+        </div>
 
-          <!-- Order ID Field (conditional) -->
-          <div class="mb-3" id="orderIdContainer">
-            <label for="orderId" class="form-label">Order ID (if applicable)</label>
-            <input
-              type="text"
-              class="form-control"
-              id="orderId"
-              name="order_id"
-            />
-          </div>
+        <!-- Order ID Field (conditional) -->
+        <div class="mb-3" id="orderIdContainer">
+          <label for="orderId" class="form-label">Order ID (if applicable)</label>
+          <input
+            type="text"
+            class="form-control"
+            id="orderId"
+            name="order_id"
+          />
+        </div>
 
-          <!-- Variation Field -->
-          <div class="mb-3">
-            <label for="variation" class="form-label">Variation</label>
-            <input
-              type="text"
-              class="form-control"
-              id="variation"
-              name="variation"
-              required
-            />
-          </div>
+        <!-- Variation Field -->
+        <div class="mb-3">
+          <label for="variation" class="form-label">Variation</label>
+          <input
+            type="text"
+            class="form-control"
+            id="variation"
+            name="variation"
+            required
+          />
+        </div>
 
-          <!-- Issues Field -->
-          <div class="mb-3">
-            <label for="issues" class="form-label">Issue(s)</label>
-            <textarea
-              class="form-control"
-              id="issues"
-              name="issue"
-              rows="3"
-              required
-            ></textarea>
-          </div>
+        <!-- Issues Field -->
+        <div class="mb-3">
+          <label for="issues" class="form-label">Issue(s)</label>
+          <textarea
+            class="form-control"
+            id="issues"
+            name="issue"
+            rows="3"
+            required
+          ></textarea>
+        </div>
 
-          <!-- Actions for Repair Field -->
-          <div class="mb-3">
-            <label for="repairActions" class="form-label">Actions for Repair</label>
-            <textarea
-              class="form-control"
-              id="repairActions"
-              name="actions"
-              rows="3"
-              required
-            ></textarea>
-          </div>
+        <!-- Actions for Repair Field -->
+        <div class="mb-3">
+          <label for="repairActions" class="form-label">Actions for Repair</label>
+          <textarea
+            class="form-control"
+            id="repairActions"
+            name="actions"
+            rows="3"
+            required
+          ></textarea>
+        </div>
 
-          <!-- Hidden applicant field (populated via Firebase) -->
-          <input type="hidden" id="repairApplicant" name="applicant" />
+        <!-- Hidden applicant field (populated via Firebase) -->
+        <input type="hidden" id="repairApplicant" name="applicant" />
 
-          <!-- File Upload -->
-          <div class="mb-3">
-            <label for="repairFiles" class="form-label">Upload Images/Videos</label>
-            <input
-              class="form-control"
-              type="file"
-              id="repairFiles"
-              name="media"
-              multiple
-              accept="image/*,video/*"
-            />
-            <div class="form-text">Upload up to 5 files. Maximum file size: 10MB each.</div>
+        <!-- File Upload -->
+        <div class="mb-3">
+          <label for="repairFiles" class="form-label">Upload Images/Videos</label>
+          <input
+            class="form-control"
+            type="file"
+            id="repairFiles"
+            name="media"
+            multiple
+            accept="image/*,video/*"
+          />
+          <div class="form-text">Upload up to 5 files. Maximum file size: 10MB each.</div>
 
-            <!-- Preview Container -->
-            <div id="repairFilePreviewContainer" class="mt-3 d-flex flex-wrap gap-2"></div>
-          </div>
+          <!-- Preview Container -->
+          <div id="repairFilePreviewContainer" class="mt-3 d-flex flex-wrap gap-2"></div>
+        </div>
 
-          <!-- Submit Button -->
-          <button type="submit" class="btn btn-primary">Submit Repair Request</button>
-        </form>
-      </div>
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Submit Repair Request</button>
+      </form>
     </div>
   </div>
-  <!-- End Repairs Submission Page -->
+</div>
+<!-- End Repairs Submission Page -->
+
+<!-- Add this JavaScript to handle the form submission and redirection -->
+<script>
+  function submitRepairForm(event) {
+    event.preventDefault();
+    
+    const form = document.getElementById('repairItemForm');
+    const formData = new FormData(form);
+    
+    // Get the current user's email if authenticated (from Firebase)
+    if (firebase.auth().currentUser) {
+      formData.set('applicant', firebase.auth().currentUser.email);
+    }
+    
+    // Show loading state (optional)
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
+    
+    fetch('/repairs', {
+      method: 'POST',
+      body: formData,
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        throw new Error('Form submission failed');
+      }
+    })
+    .then(html => {
+      // Replace the current page content with the success page HTML
+      document.open();
+      document.write(html);
+      document.close();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('An error occurred while submitting your repair request. Please try again.');
+      
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    });
+  }
+  
+  // Show/hide Order ID field based on repair purpose selection
+  document.getElementById('repairPurpose').addEventListener('change', function() {
+    const orderIdContainer = document.getElementById('orderIdContainer');
+    if (this.value === 'customer') {
+      orderIdContainer.style.display = 'block';
+    } else {
+      orderIdContainer.style.display = 'none';
+      document.getElementById('orderId').value = '';
+    }
+  });
+  
+  // Initialize file preview functionality
+  document.getElementById('repairFiles').addEventListener('change', function() {
+    const previewContainer = document.getElementById('repairFilePreviewContainer');
+    previewContainer.innerHTML = '';
+    
+    if (this.files.length > 5) {
+      alert('You can only upload up to 5 files');
+      this.value = '';
+      return;
+    }
+    
+    Array.from(this.files).forEach(file => {
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`File "${file.name}" exceeds the 10MB size limit`);
+        return;
+      }
+      
+      const preview = document.createElement('div');
+      preview.className = 'position-relative';
+      
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.height = '100px';
+        img.style.objectFit = 'cover';
+        img.className = 'border rounded';
+        preview.appendChild(img);
+      } else if (file.type.startsWith('video/')) {
+        const videoWrapper = document.createElement('div');
+        videoWrapper.className = 'border rounded d-flex align-items-center justify-content-center bg-light';
+        videoWrapper.style.height = '100px';
+        videoWrapper.style.width = '100px';
+        
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-film';
+        icon.style.fontSize = '2rem';
+        
+        videoWrapper.appendChild(icon);
+        preview.appendChild(videoWrapper);
+      }
+      
+      previewContainer.appendChild(preview);
+    });
+  });
+</script>
   
   <!-- Repairs History Page -->
   <div id="repairs-history" class="page">
