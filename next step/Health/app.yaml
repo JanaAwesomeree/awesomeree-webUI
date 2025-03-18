@@ -1,0 +1,28 @@
+runtime: nodejs22
+env: standard
+
+beta_settings:
+  cloud_sql_instances: deeptest-449907:asia-southeast1:awe350
+
+
+env_variables:
+  GOOGLE_CLIENT_ID: "494910305254-5os9mkmil0t6ajnglbkjerrgknffj5k6.apps.googleusercontent.com"
+  GOOGLE_CLIENT_SECRET: "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"
+  GOOGLE_APPLICATION_CREDENTIALS: "deeptest-internal-b64f4d3debdf.json"
+  GCS_BUCKET: "return-request"
+  SESSION_SECRET: "mySuperSecretKey123!@#"
+  NODE_ENV: "development"
+  FIREBASE_SERVICE_ACCOUNT_PATH: "awesomeree-internal-firebase-adminsdk-fbsvc-2bd4c817fd.json"
+  DB_USER: "root"
+  DB_PASSWORD: "d(Qsbh~$.2FOpNl"
+  DB_NAME: "requestDatabase"
+  # Use the Cloud SQL Unix socket path with your instance connection name:
+  DB_HOST: "/cloudsql/deeptest-449907:asia-southeast1:awe350"
+
+handlers:
+  - url: /static
+    static_dir: static/
+
+  - url: /.*
+    script: auto
+    secure: always

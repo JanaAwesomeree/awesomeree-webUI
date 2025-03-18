@@ -1,0 +1,54 @@
+/* Bootstrap Collapse Enhancement Styles */
+
+/* Remove default dropdown arrow from browser */
+.dropdown-toggle::after {
+    display: none !important;
+  }
+  
+  /* Custom chevron styling */
+  .dropdown-toggle .bi-chevron-down {
+    transition: transform 0.3s ease;
+  }
+  
+  .dropdown-toggle[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(180deg);
+  }
+  
+  /* Improve submenu styling */
+  .submenu {
+    padding-left: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .submenu .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+  }
+  
+  .submenu .nav-link:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+  }
+  
+  .submenu .nav-link i {
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  /* Ensure Bootstrap collapse has consistent animation */
+  .collapse {
+    transition: height 0.3s ease !important;
+  }
+  
+  /* Ensure dropdown items are properly spaced */
+  .dropdown .nav-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* Fix for dropdown positioning */
+  .dropdown {
+    position: relative;
+  }
